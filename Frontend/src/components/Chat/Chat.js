@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "../../axios";
 import "./Chat.css";
 import { Avatar, IconButton } from "@material-ui/core";
 import {
@@ -9,7 +10,21 @@ import {
   Mic,
 } from "@material-ui/icons";
 
-const Chat = () => {
+const Chat = ({ messages }) => {
+  const [input, setInput] = useState("");
+
+  const senMessage = async (e) => {
+    e.preventDefault();
+
+    await axios.post("/messages/new", {
+      message: input,
+      name: "Demo App",
+      timestamp: "Just now",
+      received: false,
+    });
+    setInput("");
+  };
+
   return (
     <div className="chat">
       <div className="chat__header">
@@ -33,28 +48,29 @@ const Chat = () => {
       </div>
 
       <div className="chat__body">
-        <p className="chat__message">
-          <span className="chat__name">Anis</span>
-          This is the message
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message chat__reciever">
-          <span className="chat__name">Anis</span>
-          This is the message
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
+        {messages.map((message) => (
+          <p
+            className={`chat__message ${message.reseived && "chat__reciever"}`}
+          >
+            <span className="chat__name">{message.name}</span>
+            {message.message}
+            <span className="chat__timestamp">{message.timestamp}</span>
+          </p>
+        ))}
       </div>
+
       <div className="chat__footer">
         <InsertEmoticon />
         <form action="">
           <input
-            // value={input}
-            // onChange={(e) => SettingsInputAntenna(e.target.value)}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             placeholder="Type a message"
             type="text"
           />
-          <button type="submit">Send a message</button>
+          <button onClick={senMessage} type="submit">
+            Send a message
+          </button>
         </form>
         <Mic />
       </div>
